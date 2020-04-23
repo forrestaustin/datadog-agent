@@ -323,12 +323,63 @@ def lint_licenses(ctx):
     Checks that the LICENSE-3rdparty.csv file is up-to-date with contents of go.sum
     """
     print("Verify licenses")
-    if sys.platform == 'win32':
-        print("skip verify licenses on windows for now")
-        # TODO: implement equivalent script in windows shell
-        return
-    ctx.run("tools/licenses/verify-license.sh")
 
+    licences = []
+    file='LICENSE-3rdparty.csv'
+    with open(file, 'r') as f:
+        next(f)
+        for line in f:
+            licences.append(line.rstrip())
+
+    new_licences = get_licenses_list(ctx)
+
+    removed_licences = [ele for ele in new_licences if ele not in licences]
+    for licence in removed_licences:
+        print("- {}".format(licence))
+
+    added_licences = [ele for ele in licences if ele not in new_licences]
+    for licence in added_licences:
+        print("+ {}".format(licence))
+
+    if len(removed_licences) + len(added_licences) > 0:
+        print("licenses are not up-to-date")
+        raise Exit(code=1)
+
+    print("licenses ok")
+
+
+@task
+def generate_licenses(ctx, filename='LICENSE-3rdparty.csv', verbose=False):
+    """
+    Generates that the LICENSE-3rdparty.csv file is up-to-date with contents of go.sum
+    """
+    with open(filename, 'w') as f:
+        f.write("Component,Origin,License\n")
+        for license in get_licenses_list(ctx):
+            if verbose:
+                print(license)
+            f.write('{}\n'.format(license))
+    print("licenses files generated")
+
+def get_licenses_list(ctx):
+    result = ctx.run('{}/bin/wwhrd list --no-color'.format(get_gopath(ctx)), hide='err')
+    licenses=[]
+    licenses.append('core,"github.com/frapposelli/wwhrd",MIT')
+    if result.stderr:
+        for line in result.stderr.split("\n") :
+            index = line.find('msg="Found License"')
+            if index == -1:
+                continue
+            license = ""
+            package = ""
+            for val in line[index+len('msg="Found License"'):].split(" "):
+                if val.startswith('license='):
+                    license = val[len('license='):]
+                elif val.startswith('package='):
+                    package = val[len('package='):]
+                    licenses.append("core,{},{}".format(package,license))
+    licenses.sort()
+    return licenses
 
 @task
 def lint_licenses_old(ctx):

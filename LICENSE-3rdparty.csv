@@ -1,5 +1,4 @@
 Component,Origin,License
-core,"github.com/frapposelli/wwhrd",MIT
 core,"code.cloudfoundry.org/bbs",Apache-2.0
 core,"code.cloudfoundry.org/bbs/encryption",Apache-2.0
 core,"code.cloudfoundry.org/bbs/events",Apache-2.0
@@ -221,6 +220,7 @@ core,"github.com/emicklei/go-restful/log",MIT
 core,"github.com/evanphx/json-patch",NewBSD
 core,"github.com/fatih/color",MIT
 core,"github.com/florianl/go-conntrack",MIT
+core,"github.com/frapposelli/wwhrd",MIT
 core,"github.com/fsnotify/fsnotify",NewBSD
 core,"github.com/go-ini/ini",Apache-2.0
 core,"github.com/go-ole/go-ole",MIT
